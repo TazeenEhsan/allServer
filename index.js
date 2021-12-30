@@ -16,6 +16,8 @@ const port = process.env.PORT || 5000;
 
 // https://guarded-thicket-98440.herokuapp.com/morning
 
+// https://shrouded-bastion-71024.herokuapp.com/
+
 
 app.use(cors());
 app.use(express.json());
@@ -31,7 +33,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 //JWT Auth
 
 const generateJWTToken = (user) => {
-    return jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: "50s" });
+    return jwt.sign(user, process.env.TOKEN_SECRET, { expiresIn: "500s" });
 };
 
 const verifyJWTToken = (req, res, next) => {
@@ -67,6 +69,7 @@ async function run() {
 
         const jobPortalUsers = database.collection('jobUsers');
         const jobPortalAllJobs = database.collection('jobPortalAllJobs');
+
 
         // const blogsCollection = database.collection('blogs');
         // const usersCollection = database.collection('users');
@@ -151,12 +154,20 @@ async function run() {
 
             if (requester) {
                 const result = await jobPortalAllJobs.insertOne(newUser);
+                res.json({ message: 'added successfully' });
             }
             else {
-                res.status(403).json({ message: 'you do not have access ' })
+                res.json({ message: 'you do not have access ' })
             }
 
         });
+
+        app.get('/jobPortalAllJobs', async (req, res) => {
+            const cursor = jobPortalAllJobs.find({});
+            const blogs = await cursor.toArray();
+            res.send(blogs);
+        });
+
 
 
 
@@ -198,11 +209,11 @@ async function run() {
 
 
         //Delete Single Product
-        app.delete('/blogs/:id', async (req, res) => {
+        app.delete('/jobs/:id', async (req, res) => {
             const id = req.params.id;
             console.log(id);
             const query = { _id: ObjectId(id) };
-            const result = await blogsCollection.deleteOne(query);
+            const result = await jobPortalAllJobs.deleteOne(query);
 
             // console.log('deleting user with id ', result);
             res.json(result);
@@ -215,7 +226,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('Running ST Blogs');
+    res.send('Running ST ');
 });
 app.get('/morning', (req, res) => {
     res.send('Morning');
@@ -226,7 +237,7 @@ app.get('/hello', (req, res) => {
 
 
 app.listen(port, () => {
-    console.log('ST Blogs running at', port);
+    console.log('ST running at', port);
 });
 
 // done all
